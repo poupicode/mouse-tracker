@@ -7,7 +7,6 @@ const path = require('path');
 const app = express();
 app.use(cors());
 
-// Servir les fichiers statiques de 'public' (index.html, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
@@ -21,44 +20,48 @@ const io = socketIo(server, {
     }
 });
 
-let users = {};  // Pour stocker les utilisateurs
-let availableColors = ['red', 'blue', 'orange', 'pink'];  // Liste des couleurs disponibles
+let users = {};  // Stocke { socket.id: couleur }
+let availableColors = ['red', 'blue', 'orange', 'pink'];  
 
 io.on('connection', (socket) => {
     console.log('Nouvelle connexion:', socket.id);
 
-    // Vérifie si une couleur est disponible, sinon rejette la connexion
     if (availableColors.length === 0) {
         socket.emit('error', 'Aucune couleur disponible');
         socket.disconnect();
         return;
     }
 
-    // Attribuer la première couleur disponible à l'utilisateur
-    const assignedColor = availableColors.shift();  // Prend la première couleur dans la liste
+    // 🔥 Attribuer la première couleur dispo
+    const assignedColor = availableColors.shift();  
+    users[socket.id] = assignedColor;  
 
-    // Enregistrer la couleur pour cet utilisateur
-    users[socket.id] = { color: assignedColor };
+    // 🔄 Envoyer la couleur uniquement à l'utilisateur concerné
+    socket.emit('user_color', assignedColor);  
 
-    // Envoie la couleur au client lors de la connexion
-    socket.emit('user_color', assignedColor);
-
-    // Écoute des mouvements de souris de l'utilisateur
+    // Quand l'utilisateur bouge sa souris
     socket.on('mouse_move', (data) => {
-        // Diffuser la position de la souris avec l'id de l'utilisateur et la couleur
-        io.emit('mouse_move', { id: socket.id, ...data, color: assignedColor });
+        if (users[socket.id]) {  
+            io.emit('mouse_move', { 
+                id: socket.id, 
+                x: data.x, 
+                y: data.y, 
+                color: users[socket.id]  
+            });
+        }
     });
 
-    // Gestion de la déconnexion
+    // 🛑 Gestion de la déconnexion propre
     socket.on('disconnect', () => {
-        // Libérer la couleur pour qu'elle soit réutilisée
-        availableColors.push(assignedColor);
         console.log('Utilisateur déconnecté:', socket.id);
-        delete users[socket.id];
+        
+        if (users[socket.id]) {
+            availableColors.push(users[socket.id]);  // 🔄 Remet la couleur dispo
+            delete users[socket.id];  
+        }
     });
 });
 
-// Démarrer le serveur
 server.listen(3000, '0.0.0.0', () => {
-    console.log('Serveur sur http://localhost:3000');
+    console.log('Serveur en ligne sur http://localhost:3000');
 });

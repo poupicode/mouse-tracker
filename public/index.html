@@ -6,15 +6,8 @@
     <title>Suivi de souris</title>
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <style>
-        * {
-            cursor: none !important;  /* Cacher le curseur natif */
-        }
-
-        body {
-            height: 100vh;
-            width: 100vw;
-        }
-
+        * { cursor: none !important; }
+        body { height: 100vh; width: 100vw; }
         .cursor {
             position: absolute;
             width: 32px;
@@ -27,11 +20,9 @@
 <body>
     <script>
         const socket = io('https://mouse-tracker-3lz2.onrender.com');
-
-        // Variables pour stocker l'ID et la couleur de l'utilisateur
         let userColor = '';
 
-        // Créer l'image du curseur personnalisé pour l'utilisateur local
+        // 🎨 Créer le curseur local
         const userCursor = document.createElement("img");
         userCursor.style.position = "absolute";
         userCursor.style.width = "32px";
@@ -40,29 +31,33 @@
         userCursor.style.zIndex = "2";
         document.body.appendChild(userCursor);
 
-        // Mise à jour de la position du curseur local
+        // 📌 Mettre à jour la position du curseur local
         document.addEventListener('mousemove', (event) => {
+            if (!userColor) return;  
+
             const position = { x: event.clientX, y: event.clientY };
             userCursor.style.left = `${event.clientX - userCursor.width / 2}px`; 
             userCursor.style.top = `${event.clientY - userCursor.height / 2}px`;
+
             socket.emit('mouse_move', position);
         });
 
-        // Recevoir la couleur de l'utilisateur et mettre à jour le curseur local
+        // 🎨 Recevoir la couleur de l'utilisateur et mettre à jour son curseur
         socket.on('user_color', (color) => {
             userColor = color;
-            userCursor.src = `images/${color}-cursor.png`;  // Mettre à jour le curseur de l'utilisateur avec la couleur reçue
+            userCursor.src = `images/${color}-cursor.png`;  
         });
 
-        // Affichage des curseurs des autres utilisateurs
+        // 🎯 Afficher les curseurs des autres utilisateurs
         socket.on('mouse_move', (data) => {
+            if (data.id === socket.id) return;  // ⛔ Ignore ton propre curseur reçu du serveur
+
             let cursor = document.querySelector(`.cursor[data-id="${data.id}"]`);
             
             if (!cursor) {
-                // Créer un nouveau curseur pour cet utilisateur si ce n'est pas encore fait
                 cursor = document.createElement('img');
                 cursor.className = 'cursor';
-                cursor.src = `images/${data.color}-cursor.png`;  // Utilise la couleur reçue pour le curseur
+                cursor.src = `images/${data.color}-cursor.png`;  
                 cursor.style.width = "32px";
                 cursor.style.height = "48px";
                 cursor.style.pointerEvents = "none";
@@ -75,7 +70,6 @@
             cursor.style.top = `${data.y - cursor.height / 2}px`;
         });
 
-        // Gestion des erreurs si aucune couleur n'est disponible
         socket.on('error', (message) => {
             alert(message);
         });
