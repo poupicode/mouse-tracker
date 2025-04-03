@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi de souris</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        .cursor {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: red;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const socket = io('http://192.168.1.23:3000');
+        
+        document.addEventListener('mousemove', (event) => {
+            const position = { x: event.clientX, y: event.clientY };
+            socket.emit('mouse_move', position);
+        });
+
+        socket.on('mouse_move', (data) => {
+            let cursor = document.querySelector('.cursor');
+            if (!cursor) {
+                cursor = document.createElement('div');
+                cursor.className = 'cursor';
+                document.body.appendChild(cursor);
+            }
+            cursor.style.left = `${data.x}px`;
+            cursor.style.top = `${data.y}px`;
+        });
+    </script>
+</body>
+</html>
