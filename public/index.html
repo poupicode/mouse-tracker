@@ -17,7 +17,7 @@
 </head>
 <body>
     <script>
-        const socket = io('http://192.168.1.23:3000');
+        const socket = io('https://mouse-tracker-3lz2.onrender.com');
         
         document.addEventListener('mousemove', (event) => {
             const position = { x: event.clientX, y: event.clientY };

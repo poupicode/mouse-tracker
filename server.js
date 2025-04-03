@@ -9,6 +9,10 @@ app.use(cors());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
@@ -28,4 +32,6 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(3000, '0.0.0.0', () => console.log('Serveur sur http://localhost:3000'));
+server.listen(3000, '0.0.0.0', () => {
+    console.log('Serveur sur http://localhost:3000');
+});
