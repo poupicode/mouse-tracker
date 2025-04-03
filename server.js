@@ -20,15 +20,25 @@ const io = socketIo(server, {
     }
 });
 
+let users = {};
+
 io.on('connection', (socket) => {
-    console.log('Nouvelle connexion');
+    console.log('Nouvelle connexion', socket.id);
+
+    // Attribuer une couleur aléatoire à chaque utilisateur
+    const colors = ['red', 'blue', 'orange', 'pink'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+    // Enregistrer la couleur de l'utilisateur
+    users[socket.id] = { color: randomColor };
 
     socket.on('mouse_move', (data) => {
-        socket.broadcast.emit('mouse_move', data);
+        // Inclure la couleur dans les données envoyées aux autres utilisateurs
+        io.emit('mouse_move', { id: socket.id, ...data, color: randomColor });
     });
 
     socket.on('disconnect', () => {
-        console.log('Utilisateur déconnecté');
+        delete users[socket.id];
     });
 });
 

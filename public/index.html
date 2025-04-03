@@ -6,60 +6,76 @@
     <title>Suivi de souris</title>
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <style>
-        * {
+        /* Appliquer le curseur caché à l'ensemble du body */
+        /* * {
             cursor: none !important;
-        }
+        } */
 
         body {
-            height: 100vh;
-            width: 100vw;
+            height: 100%;
+            width: 100%;
         }
 
+        /* Style par défaut des curseurs des autres utilisateurs */
         .cursor {
             position: absolute;
-            width: 32px;
-            height: 32px;
-            pointer-events: none;
-            z-index: 3;
+            width: 32px;   /* Taille du curseur */
+            height: 32px;  /* Taille du curseur */
+            pointer-events: none; /* Empêcher le curseur de bloquer les interactions avec les autres éléments */
+            z-index: 3; /* Assurez-vous que le curseur est en avant */
         }
+
     </style>
 </head>
 <body>
     <script>
-        document.body.style.cursor = "none";
+        document.body.style.cursor = "none";  // Cacher le curseur natif
 
         const socket = io('https://mouse-tracker-3lz2.onrender.com');
         
+        // Créer l'image du curseur personnalisé pour l'utilisateur local
         const userCursor = document.createElement("img");
-        userCursor.src = "images/red-cursor.png";
+        userCursor.src = "images/red-cursor.png"; // Remplace par le chemin vers ton image de curseur pour l'utilisateur local
         userCursor.style.position = "absolute";
+        userCursor.style.marginLeft = "13px";
+        userCursor.style.marginTop = "20px";
         userCursor.style.width = "32px";
         userCursor.style.height = "48px";
-        userCursor.style.pointerEvents = "none";
-        userCursor.style.zIndex = "2";
+        userCursor.style.pointerEvents = "none"; // Le curseur local ne doit pas interférer avec les éléments cliquables
+        userCursor.style.zIndex = "2";  // Assurez-vous qu'il est au-dessus des autres éléments
         document.body.appendChild(userCursor);
         
+        // Mise à jour de la position du curseur local
         document.addEventListener('mousemove', (event) => {
             const position = { x: event.clientX, y: event.clientY };
-            
             userCursor.style.left = `${event.clientX - userCursor.width / 2}px`; 
             userCursor.style.top = `${event.clientY - userCursor.height / 2}px`;
-
             socket.emit('mouse_move', position);
         });
 
+        // Gestion des curseurs des autres utilisateurs
         socket.on('mouse_move', (data) => {
             let cursor = document.querySelector(`.cursor[data-id="${data.id}"]`);
             
             if (!cursor) {
+                // Créer un nouveau curseur pour cet utilisateur si ce n'est pas encore fait
                 cursor = document.createElement('img');
                 cursor.className = 'cursor';
-                cursor.src = "images/blue-cursor.png";
+                
+                // Affecter un curseur basé sur l'ID ou une autre logique
+                if (data.color === 'orange') {
+                    cursor.src = "images/orange-cursor.png"; // Mets l'image du curseur orange
+                } else if (data.color === 'pink') {
+                    cursor.src = "images/pink-cursor.png"; // Mets l'image du curseur rose
+                } else {
+                    cursor.src = "images/blue-cursor.png"; // Mets l'image du curseur par défaut
+                }
+
                 cursor.style.width = "32px";
                 cursor.style.height = "48px";
                 cursor.style.pointerEvents = "none";
                 cursor.dataset.id = data.id;
-                cursor.style.zIndex = "1";
+                cursor.style.zIndex = "1"; // S'assurer que le curseur de l'autre utilisateur est sous le local
                 document.body.appendChild(cursor);
             }
 
