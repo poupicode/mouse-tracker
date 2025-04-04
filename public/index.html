@@ -2,77 +2,19 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suivi de souris</title>
+    <title>Cursor Parc</title>
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
-    <style>
-        * { cursor: none !important; }
-        body { height: 100vh; width: 100vw; }
-        .cursor {
-            position: absolute;
-            width: 32px;
-            height: 32px;
-            pointer-events: none;
-            z-index: 3;
-        }
-    </style>
 </head>
 <body>
-    <script>
-        const socket = io('https://mouse-tracker-3lz2.onrender.com');
-        let userColor = '';
 
-        // 🎨 Créer le curseur local
-        const userCursor = document.createElement("img");
-        userCursor.style.position = "absolute";
-        userCursor.style.width = "32px";
-        userCursor.style.height = "48px";
-        userCursor.style.pointerEvents = "none";
-        userCursor.style.zIndex = "2";
-        document.body.appendChild(userCursor);
+<div id="userList">
+    <strong>Connectés :</strong>
+    <ul id="users"></ul>
+</div>
 
-        // 📌 Mettre à jour la position du curseur local
-        document.addEventListener('mousemove', (event) => {
-            if (!userColor) return;  
+<div id="titleBanner">CURSOR PARC</div>
 
-            const position = { x: event.clientX, y: event.clientY };
-            userCursor.style.left = `${event.clientX - userCursor.width / 2}px`; 
-            userCursor.style.top = `${event.clientY - userCursor.height / 2}px`;
-
-            socket.emit('mouse_move', position);
-        });
-
-        // 🎨 Recevoir la couleur de l'utilisateur et mettre à jour son curseur
-        socket.on('user_color', (color) => {
-            userColor = color;
-            userCursor.src = `images/${color}-cursor.png`;  
-        });
-
-        // 🎯 Afficher les curseurs des autres utilisateurs
-        socket.on('mouse_move', (data) => {
-            if (data.id === socket.id) return;  // ⛔ Ignore ton propre curseur reçu du serveur
-
-            let cursor = document.querySelector(`.cursor[data-id="${data.id}"]`);
-            
-            if (!cursor) {
-                cursor = document.createElement('img');
-                cursor.className = 'cursor';
-                cursor.src = `images/${data.color}-cursor.png`;  
-                cursor.style.width = "32px";
-                cursor.style.height = "48px";
-                cursor.style.pointerEvents = "none";
-                cursor.dataset.id = data.id;
-                cursor.style.zIndex = "1";
-                document.body.appendChild(cursor);
-            }
-
-            cursor.style.left = `${data.x - cursor.width / 2}px`;
-            cursor.style.top = `${data.y - cursor.height / 2}px`;
-        });
-
-        socket.on('error', (message) => {
-            alert(message);
-        });
-    </script>
+<script src="js/main.js"></script>
 </body>
 </html>
