@@ -110,6 +110,20 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('try_become_player', () => {
+        if (availableColors.length > 0 && !users[socket.id]) {
+            const assignedColor = availableColors.shift();
+            users[socket.id] = {
+                color: assignedColor,
+                lastActive: Date.now(),
+                name: ''
+            };
+            usedColors[assignedColor] = socket.id;
+            socket.emit('user_color', assignedColor);
+            broadcastUserList();
+        }
+    });
+
     socket.on('mouse_move', (data) => {
         if (users[socket.id]) {
             users[socket.id].lastActive = Date.now();
