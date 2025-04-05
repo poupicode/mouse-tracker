@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+      "outDir": "./dist/client",
+      "rootDir": "./src/client",
+      "module": "ESNext",
+      "target": "ES6",
+      "moduleResolution": "node",
+      "lib": ["DOM", "ES2020"]
+    },
+    "include": ["src/client/**/*"]
+  }
