@@ -141,6 +141,8 @@ io.on('connection', (socket) => {
         console.log('🔴 Déconnexion:', socket.id);
         freeColor(socket.id);
         broadcastUserList();
+        
+        io.emit('user_disconnect', socket.id);
     });
 });
 

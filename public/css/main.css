@@ -1,0 +1,27 @@
+#titleBanner {
+    position: fixed;
+    top: 5vh;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 6vw;
+    font-weight: bold;
+    color: white;
+    text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    font-family: 'Arial Black', sans-serif;
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+@media (max-width: 600px) {
+    #titleBanner {
+        font-size: 9vw;
+    }
+}
+
+@media (min-width: 1200px) {
+    #titleBanner {
+        font-size: 48px;
+    }
+}
