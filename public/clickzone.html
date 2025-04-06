@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>ClickZone</title>
+  <link rel="stylesheet" href="/css/shared.css" />
+  <link rel="stylesheet" href="/css/clickzone.css" />
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+</head>
+<body>
+  <!-- Liste des utilisateurs connectés -->
+  <div id="userList">
+    <strong>Connectés :</strong>
+    <ul id="users"></ul>
+  </div>
+
+  <div id="clickzoneWrapper">
+    <div id="countdown">10.00s</div>
+
+    <div id="clickzoneContainer">
+      <div id="click-counter">0</div>
+
+      <div class="power-wrapper">
+        <div class="power-bar">
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+        </div>
+        <div class="power-bar">
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+        </div>
+      </div>
+
+      <button id="click-button">CLIQUE !</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/dist/client/shared.js" type="module"></script>
+  <script src="/dist/client/clickzone.js" type="module"></script>
+</body>
+</html>

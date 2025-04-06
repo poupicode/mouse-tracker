@@ -1,5 +1,5 @@
 // @ts-ignore
-const socket = io();
+export const socket = io();
 
 interface UserData {
     cursor: HTMLImageElement;
@@ -29,7 +29,9 @@ if (!userName) {
     userName = userName.trim().slice(0, 20);
     localStorage.setItem("userName", userName);
 }
-socket.emit("set_name", userName);
+socket.emit("set_name", userName, () => {
+    socket.emit("start_turn");
+});
 
 // 🔁 Restaurer couleur
 if (userColor && !isSpectator) {
@@ -113,6 +115,10 @@ socket.on("user_color", (color: string) => {
             socket.emit("mouse_move", { x, y });
         });
         (window as any)._cursorListenerAdded = true;
+    }
+
+    if (isSpectator) {
+        window.location.reload();
     }
 });
 

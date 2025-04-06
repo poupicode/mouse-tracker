@@ -19,6 +19,10 @@ app.get('/', (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, '../../public/index.html'));
 });
 
+app.get('/clickzone', (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '../../public/clickzone.html'));
+});
+
 interface UserData {
     color: string;
     name: string;
@@ -28,6 +32,7 @@ interface UserData {
 let users: Record<string, UserData> = {};
 let availableColors: string[] = ['red', 'blue', 'orange', 'pink'];
 let usedColors: Record<string, string> = {};
+let currentTurnId: string | null = null;
 
 const INACTIVITY_TIMEOUT = 2 * 60 * 1000;
 
@@ -84,10 +89,11 @@ io.on('connection', (socket) => {
         broadcastUserList();
     }
 
-    socket.on('set_name', (name: string) => {
+    socket.on('set_name', (name: string, callback?: () => void) => {
         if (users[socket.id]) {
             users[socket.id].name = name.trim().slice(0, 20);
             broadcastUserList();
+            if (callback) callback();
         }
     });
 
@@ -137,8 +143,49 @@ io.on('connection', (socket) => {
         }
     });
 
+    // 1. Quand un joueur clique et demande un tour
+    socket.on('start_turn', () => {
+        console.log(`📩 Reçu start_turn de ${socket.id}`);
+        if (currentTurnId === null) {
+            currentTurnId = socket.id;
+            io.emit('sync_turn', currentTurnId);
+            socket.emit('your_turn'); // Lui seul peut jouer
+            console.log(`🎮 Tour lancé par ${users[socket.id]?.name || socket.id}`);
+        }
+    });
+
+    // 2. Quand un joueur finit son tour
+    socket.on('clickzone_score', (score: { clicks: number; cps: number }) => {
+        if (socket.id !== currentTurnId) return; // si c’est pas lui ignore
+
+        const name = users[socket.id]?.name || 'Anonyme';
+        const totalScore = Math.round(score.clicks * score.cps);
+
+        io.emit('turn_result', {
+            name,
+            clicks: score.clicks,
+            cps: score.cps.toFixed(2),
+            score: totalScore
+        });
+
+        console.log(`✅ Fin du tour pour ${name} — ${score.clicks} clics (${score.cps.toFixed(2)} CPS)`);
+
+        currentTurnId = null; // libère la session
+        io.emit('sync_turn', null);
+    });
+
+    socket.on('clickzone_update', (data: { clickCount: number; elapsed: number }) => {
+        io.emit('clickzone_sync', {
+            socketId: socket.id,
+            ...data
+        });
+    });
+
     socket.on('disconnect', () => {
         console.log('🔴 Déconnexion:', socket.id);
+        if (socket.id === currentTurnId) {
+            currentTurnId = null;
+        }
         freeColor(socket.id);
         broadcastUserList();
         io.emit('user_disconnect', socket.id);
