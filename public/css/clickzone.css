@@ -47,21 +47,19 @@ border-radius: 10px;
 margin-bottom: 20px;
 }
 
-/* Barres alignées horizontalement */
 .power-wrapper {
 display: flex;
 justify-content: center;
-gap: 30px;
+gap: 20px; /* moins d’espace entre les deux barres */
 margin-bottom: 30px;
 }
 
-/* Barres verticales */
 .power-bar {
 display: flex;
 flex-direction: column-reverse; /* du bas vers le haut */
 justify-content: space-between;
-height: 150px;
-width: 40px;
+height: 300px; /* plus grand pour 10 segments */
+width: 30px;    /* un peu plus étroit */
 background: #111;
 border-radius: 8px;
 padding: 5px;
@@ -70,10 +68,10 @@ box-shadow: inset 0 0 6px rgba(0,0,0,0.6);
 
 .segment {
 width: 100%;
-height: 30%;
-margin: 3px 0;
+height: 8%;         /* 10 segments = ~8% pour laisser un peu d’espace */
+margin: 2px 0;      /* moins d’espace entre eux */
 background-color: black;
-border-radius: 6px;
+border-radius: 4px;
 opacity: 0.1;
 transition: background-color 0.3s, opacity 0.3s;
 }
@@ -165,7 +163,7 @@ animation: glow 0.3s infinite alternate;
 }
 
 #clickzoneContainer {
-    width: 100%;
+    width: 60%;
     padding: 20px 10px;
 }
 
@@ -180,12 +178,13 @@ animation: glow 0.3s infinite alternate;
 }
 
 .power-bar {
-    height: 100px;
-    width: 30px;
+height: 240px;
+width: 25px;
 }
+  
 
 #click-button {
-    font-size: 5vw;
+    font-size: 3vw;
     width: 28vw;
     height: 28vw;
     max-width: 120px;
@@ -203,6 +202,7 @@ animation: glow 0.3s infinite alternate;
 /* 📱 PETIT ÉCRAN — mobile portrait, petit smartphone */
 @media (max-width: 600px) {
 #clickzoneWrapper {
+    width: 50%;
     padding: 0 8px;
 }
 
@@ -221,12 +221,12 @@ animation: glow 0.3s infinite alternate;
 }
 
 .power-bar {
-    width: 24px;
-    height: 80px;
+height: 180px;
+width: 20px;
 }
 
 #click-button {
-    font-size: 6vw;
+    font-size: 3vw;
     width: 25vw;
     height: 25vw;
     min-width: 70px;

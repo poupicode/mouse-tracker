@@ -15,8 +15,8 @@ let currentTurnSocketId: string | null = null;
 /** 🎨 Détermine la couleur selon la vitesse de clics */
 function getColorFromCPS(cps: number): string {
     if (cps < 3) return "black";
-    if (cps < 4) return "red";
-    if (cps < 5) return "orange";
+    if (cps < 6) return "red";
+    if (cps < 8) return "orange";
     return "green";
 }
 
@@ -31,10 +31,9 @@ function updateBarsAndTimer() {
     counterDisplay.innerText = clickCount.toString();
 
     const color = getColorFromCPS(cps);
-    let segments = 0;
-    if (clickCount >= 10) segments++;
-    if (clickCount >= 35) segments++;
-    if (clickCount >= 45) segments++;
+    const totalSegments = 10;
+    const maxClicks = 70; // tu peux ajuster ça selon ton échelle
+    const segments = Math.min(totalSegments, Math.floor((clickCount / maxClicks) * totalSegments));
 
     bars.forEach(bar => {
         Array.from(bar.children).forEach((segment, index) => {
@@ -48,7 +47,7 @@ function updateBarsAndTimer() {
             }
         });
 
-        if (clickCount >= 50) {
+        if (clickCount >= 100) {
             bar.classList.add("glow-blue");
         } else {
             bar.classList.remove("glow-blue");
@@ -107,14 +106,15 @@ socket.on('waiting_turn', (playerName: string) => {
     countdown.innerText = `En attente de ${playerName}`;
 });
 
-socket.on('sync_turn', (turnId: string) => {
+socket.on('sync_turn', (turnId: string | null) => {
     currentTurnSocketId = turnId;
     isPlaying = socket.id === turnId;
     clickButton.disabled = !isPlaying;
+    if (!turnId) hasRequestedTurn = false; // reset turn request status after sync ends
 });
 
 socket.on('clickzone_sync', (data: { socketId: string; clickCount: number; elapsed: number }) => {
-    if (data.socketId === socket.id) return; // pas besoin de traiter si c’est moi
+    if (data.socketId === socket.id) return;
 
     const remaining = Math.max(0, 10 - data.elapsed);
     const cps = data.clickCount / (data.elapsed || 1);
@@ -123,10 +123,9 @@ socket.on('clickzone_sync', (data: { socketId: string; clickCount: number; elaps
     counterDisplay.innerText = data.clickCount.toString();
 
     const color = getColorFromCPS(cps);
-    let segments = 0;
-    if (data.clickCount >= 10) segments++;
-    if (data.clickCount >= 35) segments++;
-    if (data.clickCount >= 45) segments++;
+    const totalSegments = 10;
+    const maxClicks = 100;
+    const segments = Math.min(totalSegments, Math.floor((data.clickCount / maxClicks) * totalSegments));
 
     bars.forEach(bar => {
         Array.from(bar.children).forEach((segment, index) => {
@@ -140,14 +139,13 @@ socket.on('clickzone_sync', (data: { socketId: string; clickCount: number; elaps
             }
         });
 
-        if (data.clickCount >= 50) {
+        if (data.clickCount >= 100) {
             bar.classList.add("glow-blue");
         } else {
             bar.classList.remove("glow-blue");
         }
     });
 });
-
 
 /** 🎉 Fin du tour : on montre la carte */
 socket.on('turn_result', (data: { name: string, clicks: number, cps: string, score: number }) => {
@@ -175,10 +173,10 @@ socket.on('turn_result', (data: { name: string, clicks: number, cps: string, sco
     document.body.appendChild(card);
     clickButton.setAttribute("disabled", "true");
 
-    document.body.appendChild(card);
-
     setTimeout(() => {
         card.remove();
         clickButton.removeAttribute("disabled");
+        currentTurnSocketId = null;
+        isPlaying = false;
     }, 4000);
 });
