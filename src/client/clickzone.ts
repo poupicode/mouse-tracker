@@ -12,7 +12,6 @@ let isPlaying = false;
 let hasRequestedTurn = false;
 let currentTurnSocketId: string | null = null;
 
-/** 🎨 Détermine la couleur selon la vitesse de clics */
 function getColorFromCPS(cps: number): string {
     if (cps < 3) return "black";
     if (cps < 6) return "red";
@@ -20,7 +19,6 @@ function getColorFromCPS(cps: number): string {
     return "green";
 }
 
-/** 🔁 Met à jour compteur, timer et barres */
 function updateBarsAndTimer() {
     const now = Date.now();
     const elapsed = (now - (startTime ?? 0)) / 1000;
@@ -32,7 +30,7 @@ function updateBarsAndTimer() {
 
     const color = getColorFromCPS(cps);
     const totalSegments = 10;
-    const maxClicks = 70; // tu peux ajuster ça selon ton échelle
+    const maxClicks = 70;
     const segments = Math.min(totalSegments, Math.floor((clickCount / maxClicks) * totalSegments));
 
     bars.forEach(bar => {
@@ -71,13 +69,12 @@ function updateBarsAndTimer() {
     }
 }
 
-/** 🖱️ Gérer les clics */
 clickButton.addEventListener("click", () => {
     if (!isPlaying && !hasRequestedTurn) {
         console.log("🟡 Demande de tour envoyée");
         socket.emit("start_turn");
         hasRequestedTurn = true;
-        return; // on attend la réponse 'your_turn'
+        return;
     }
 
     if (!isPlaying) return;
@@ -99,7 +96,6 @@ socket.on('your_turn', () => {
     counterDisplay.innerText = "0";
 });
 
-/** 🕐 Session en cours : rien ne se passe */
 socket.on('waiting_turn', (playerName: string) => {
     isPlaying = false;
     clickButton.setAttribute("disabled", "true");
@@ -110,7 +106,7 @@ socket.on('sync_turn', (turnId: string | null) => {
     currentTurnSocketId = turnId;
     isPlaying = socket.id === turnId;
     clickButton.disabled = !isPlaying;
-    if (!turnId) hasRequestedTurn = false; // reset turn request status after sync ends
+    if (!turnId) hasRequestedTurn = false;
 });
 
 socket.on('clickzone_sync', (data: { socketId: string; clickCount: number; elapsed: number }) => {
@@ -147,7 +143,6 @@ socket.on('clickzone_sync', (data: { socketId: string; clickCount: number; elaps
     });
 });
 
-/** 🎉 Fin du tour : on montre la carte */
 socket.on('turn_result', (data: { name: string, clicks: number, cps: string, score: number }) => {
     const card = document.createElement("div");
     card.id = "scoreCard";
@@ -157,7 +152,7 @@ socket.on('turn_result', (data: { name: string, clicks: number, cps: string, sco
         <span>${data.cps} CPS</span><br/>
         <span>Score: ${data.score}</span>
     `;
-    
+
     Object.assign(card.style, {
         position: "fixed",
         top: "20px",
