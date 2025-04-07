@@ -23,7 +23,6 @@ let myTag: HTMLDivElement;
 
 const cursors: Record<string, UserData> = {};
 
-// 🔤 Demander nom
 if (!userName) {
     userName = prompt("Quel est ton nom ?") || "Anonyme";
     userName = userName.trim().slice(0, 20);
@@ -33,12 +32,10 @@ socket.emit("set_name", userName, () => {
     socket.emit("start_turn");
 });
 
-// 🔁 Restaurer couleur
 if (userColor && !isSpectator) {
     socket.emit("restore_color", userColor);
 }
 
-// 🎟 Spectateur
 socket.on("spectator_mode", (msg: string) => {
     isSpectator = true;
 
@@ -77,12 +74,10 @@ socket.on("spectator_mode", (msg: string) => {
     document.body.appendChild(msgBox);
 });
 
-// 🔁 Devenir joueur
 setInterval(() => {
     if (isSpectator) socket.emit("try_become_player");
 }, 5000);
 
-// 🎨 Couleur
 socket.on("user_color", (color: string) => {
     userColor = color;
     localStorage.setItem("userColor", color);
@@ -122,7 +117,6 @@ socket.on("user_color", (color: string) => {
     }
 });
 
-// 👁‍🗨 Mouvements des autres joueurs
 socket.on("mouse_move", (data: MoveData) => {
     if (data.id === socket.id) return;
 
@@ -147,7 +141,6 @@ socket.on("mouse_move", (data: MoveData) => {
     nameTag.style.top = `${data.y + 45}px`;
 });
 
-// 📜 Liste connectés
 socket.on("update_users", (userList: { id: string; name: string; color: string }[]) => {
     const ul = document.getElementById("users");
     if (!ul) return;
@@ -162,7 +155,6 @@ socket.on("update_users", (userList: { id: string; name: string; color: string }
     });
 });
 
-// ❌ Déconnectés
 socket.on("user_disconnect", (id: string) => {
     if (cursors[id]) {
         cursors[id].cursor.remove();
@@ -171,5 +163,4 @@ socket.on("user_disconnect", (id: string) => {
     }
 });
 
-// ⚠️ Erreur
 socket.on("error", (msg: string) => alert(msg));

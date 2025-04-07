@@ -143,20 +143,18 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 1. Quand un joueur clique et demande un tour
     socket.on('start_turn', () => {
         console.log(`📩 Reçu start_turn de ${socket.id}`);
         if (currentTurnId === null) {
             currentTurnId = socket.id;
             io.emit('sync_turn', currentTurnId);
-            socket.emit('your_turn'); // Lui seul peut jouer
+            socket.emit('your_turn');
             console.log(`🎮 Tour lancé par ${users[socket.id]?.name || socket.id}`);
         }
     });
 
-    // 2. Quand un joueur finit son tour
     socket.on('clickzone_score', (score: { clicks: number; cps: number }) => {
-        if (socket.id !== currentTurnId) return; // si c’est pas lui ignore
+        if (socket.id !== currentTurnId) return;
 
         const name = users[socket.id]?.name || 'Anonyme';
         const totalScore = Math.round(score.clicks * score.cps);
@@ -170,7 +168,7 @@ io.on('connection', (socket) => {
 
         console.log(`✅ Fin du tour pour ${name} — ${score.clicks} clics (${score.cps.toFixed(2)} CPS)`);
 
-        currentTurnId = null; // libère la session
+        currentTurnId = null;
         io.emit('sync_turn', null);
     });
 

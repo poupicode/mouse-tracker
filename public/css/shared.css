@@ -5,6 +5,8 @@ body {
     overflow: hidden;
     font-family: sans-serif;
     background-color: rgb(97, 97, 164);
+    width: 100vw;
+    height: 100vh;
 }
 
 .cursor {

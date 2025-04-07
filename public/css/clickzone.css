@@ -111,7 +111,7 @@ cursor: not-allowed;
 }
 
 .glow-blue .segment {
-animation: glow 0.3s infinite alternate;
+animation: glow 0.25s infinite alternate;
 }
 
 @keyframes glow {
