@@ -157,6 +157,7 @@ socket.on('turn_result', (data: { name: string, clicks: number, cps: string, sco
         <span>${data.cps} CPS</span><br/>
         <span>Score: ${data.score}</span>
     `;
+    
     Object.assign(card.style, {
         position: "fixed",
         top: "20px",

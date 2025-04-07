@@ -74,6 +74,7 @@ socket.on("spectator_mode", (msg: string) => {
     document.body.appendChild(msgBox);
 });
 
+
 setInterval(() => {
     if (isSpectator) socket.emit("try_become_player");
 }, 5000);
