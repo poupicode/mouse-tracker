@@ -27,6 +27,7 @@ interface UserData {
     color: string;
     name: string;
     lastActive: number;
+    isSpectator?: boolean;
 }
 
 let users: Record<string, UserData> = {};
@@ -76,13 +77,20 @@ io.on('connection', (socket) => {
 
     if (availableColors.length === 0) {
         isSpectator = true;
+        users[socket.id] = {
+            color: '',
+            lastActive: Date.now(),
+            name: '',
+            isSpectator: true
+        };
         socket.emit('spectator_mode', '🎟 Le parc est complet – vous êtes en spectateur.');
     } else {
         const assignedColor = availableColors.shift()!;
         users[socket.id] = {
             color: assignedColor,
             lastActive: Date.now(),
-            name: ''
+            name: '',
+            isSpectator: false
         };
         usedColors[assignedColor] = socket.id;
         socket.emit('user_color', assignedColor);
@@ -107,7 +115,8 @@ io.on('connection', (socket) => {
             users[socket.id] = {
                 color,
                 lastActive: Date.now(),
-                name: ''
+                name: '',
+                isSpectator: false
             };
             availableColors = availableColors.filter(c => c !== color);
             usedColors[color] = socket.id;
@@ -122,7 +131,8 @@ io.on('connection', (socket) => {
             users[socket.id] = {
                 color: assignedColor,
                 lastActive: Date.now(),
-                name: ''
+                name: '',
+                isSpectator: false
             };
             usedColors[assignedColor] = socket.id;
             socket.emit('user_color', assignedColor);
@@ -145,6 +155,11 @@ io.on('connection', (socket) => {
 
     socket.on('start_turn', () => {
         console.log(`📩 Reçu start_turn de ${socket.id}`);
+        const user = users[socket.id];
+        if (!user || user.isSpectator) {
+            console.log(`⛔ Tentative de start_turn par un spectateur`);
+            return;
+        }
         if (currentTurnId === null) {
             currentTurnId = socket.id;
             io.emit('sync_turn', currentTurnId);
